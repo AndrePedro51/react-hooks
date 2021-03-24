@@ -6,7 +6,13 @@ import * as React from 'react'
 function Greeting({initialName = ''}) {
   // 🐨 initialize the state to the value from localStorage
   // 💰 window.localStorage.getItem('name') || initialName
-  const [name, setName] = React.useState(initialName)
+
+  //lazy initializer : inicializador preguiçoso
+  //Quando o useState recebe uma função em vez de um valor como estado inicial, 
+  //essa função é executada apenas durante a fase mount do componente, sem se repetirna fase update
+  const [name, setName] = React.useState(() => window.localStorage.getItem('name') || initialName)
+  const [count, setCount] = React.useState(0)
+  const [nameUc, setNameUc] = React.useState(() => window.localStorage.getItem('nameUc') || initialName)
 
   // 🐨 Here's where you'll use `React.useEffect`.
   // The callback should set the `name` in localStorage.
@@ -14,14 +20,30 @@ function Greeting({initialName = ''}) {
 
   function handleChange(event) {
     setName(event.target.value)
+
   }
+
+  function handleClick(event){
+    setNameUc(event.target.value.toUpperCase())
+  }
+
+  //Efeito colateral a ser executado apos o componente ter sido atualizado
+
+  React.useEffect(() => {
+      //o valor do localStorage sera armazenado apos a atualização do componente
+    window.localStorage.setItem('name', name)
+    window.localStorage.setItem('nameUc', nameUc)   
+    setCount(count + 1)
+  }, [name, nameUc])
   return (
     <div>
       <form>
         <label htmlFor="name">Name: </label>
-        <input value={name} onChange={handleChange} id="name" />
+        <input value={name} onChange={handleChange} onClick = {handleClick} id="name" />
       </form>
-      {name ? <strong>Hello {name}</strong> : 'Please type your name'}
+      {name ? <strong>Hello {name}, {nameUc}</strong> : 'Please type your name'}
+      <p>localStorage : {window.localStorage.getItem('name')} - {window.localStorage.getItem('nameUc')}</p>
+      <p>Contagem: {count}</p>
     </div>
   )
 }
